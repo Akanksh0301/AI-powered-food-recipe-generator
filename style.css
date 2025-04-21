@@ -1,0 +1,120 @@
+/* Reset default margin and padding */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+  
+  /* Basic layout */
+  body {
+    background: #f4f4f4;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+  }
+  
+  /* Chat container */
+  .chat-container {
+    width: 95%;
+    max-width: 500px;
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    height: 80vh;
+  }
+  
+  /* Chat box */
+  .chat-box {
+    flex: 1;
+    padding: 16px;
+    overflow-y: auto;
+    background: #fafafa;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    scroll-behavior: smooth; /* Smooth scrolling */
+  }
+  
+  /* User and bot messages */
+  .user, .bot {
+    max-width: 80%;
+    padding: 12px 16px;
+    border-radius: 18px;
+    font-size: 15px;
+    line-height: 1.4;
+    white-space: pre-wrap;
+  }
+  
+  /* User message styling */
+  .user {
+    align-self: flex-end;
+    background-color: #d3f8d3;
+    color: #2d4d2d;
+  }
+  
+  /* Bot message styling */
+  .bot {
+    align-self: flex-start;
+    background-color: #eee;
+    color: #333;
+  }
+  
+  /* Input and button area */
+  .input-area {
+    display: flex;
+    border-top: 1px solid #ddd;
+    padding: 12px;
+    background: #fff;
+  }
+  
+  #user-input {
+    flex: 1;
+    padding: 10px 14px;
+    border: 1px solid #ccc;
+    border-radius: 20px;
+    font-size: 15px;
+    outline: none;
+  }
+  
+  button {
+    padding: 10px 20px;
+    margin-left: 10px;
+    border: none;
+    background-color: #5c67f2;
+    color: #fff;
+    border-radius: 20px;
+    font-size: 15px;
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out;
+  }
+  
+  button:hover {
+    background-color: #4b54da;
+  }
+  
+  button:disabled {
+    background-color: #ccc; /* Gray out button when disabled */
+    cursor: not-allowed; /* Show disabled cursor */
+  }
+  
+  /* Responsive design */
+  @media (max-width: 500px) {
+    .chat-container {
+      width: 100%;
+      max-width: 360px;
+    }
+  
+    button {
+      width: 30%;
+    }
+  
+    #user-input {
+      width: 65%;
+    }
+  }
+  

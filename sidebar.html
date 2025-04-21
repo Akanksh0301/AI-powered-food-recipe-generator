@@ -1,0 +1,63 @@
+<!-- Top Navigation Bar -->
+<div class="bg-red-500 text-white p-4">
+  <div class="container mx-auto flex justify-between items-center">
+    <div class="flex space-x-4">
+      <i class="fas fa-bars text-2xl cursor-pointer" onclick="toggleMenu()"></i>
+    </div>
+    <div class="text-center flex-grow">
+      <h1 class="text-2xl font-bold">SmartChef</h1>
+    </div>
+    <div class="flex space-x-4">
+      <i class="fas fa-user-circle text-2xl"></i>
+    </div>
+  </div>
+</div>
+
+<!-- Sidebar Overlay -->
+<div class="fixed inset-0 bg-black bg-opacity-50 z-20 hidden" id="overlay" onclick="toggleMenu()"></div>
+
+<!-- Sidebar Drawer -->
+<div class="fixed top-0 left-0 h-full w-64 bg-white shadow-lg z-30 transform -translate-x-full transition-transform duration-300 ease-in-out" id="sidebar">
+  <div class="p-4">
+    <ul class="space-y-4 text-black">
+      <li class="flex items-center space-x-2">
+        <i class="fas fa-home"></i>
+        <a href="index.html">Home</a>
+      </li>
+      <li class="flex items-center space-x-2">
+        <i class="fas fa-warehouse"></i>
+        <a href="pantry.html">Pantry</a>
+      </li>
+      <li class="flex items-center space-x-2">
+        <i class="fas fa-heart"></i>
+        <a href="favourites.html">Favourites</a>
+      </li>
+      <li class="flex items-center space-x-2">
+        <i class="fas fa-shopping-cart"></i>
+        <a href="shopping.html">Shopping List</a>
+      </li>
+      <li class="flex items-center space-x-2">
+        <i class="fas fa-robot"></i>
+        <a href="chatbot.html">AI Assistant</a>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<!-- Sidebar Script -->
+<script>
+  function toggleMenu() {
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('overlay');
+
+    const isHidden = sidebar.classList.contains('-translate-x-full');
+
+    if (isHidden) {
+      sidebar.classList.remove('-translate-x-full');
+      overlay.classList.remove('hidden');
+    } else {
+      sidebar.classList.add('-translate-x-full');
+      overlay.classList.add('hidden');
+    }
+  }
+</script>

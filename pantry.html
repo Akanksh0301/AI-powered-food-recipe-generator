@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Pantry</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
+    <style>
+        .menu-hidden {
+          transform: translateX(-100%);
+          transition: transform 0.3s ease-in-out;
+        }
+      
+        .menu-visible {
+          transform: translateX(0);
+          transition: transform 0.3s ease-in-out;
+        }
+      
+        #menu {
+          position: fixed;
+          top: 0;
+          left: 0;
+          bottom: 0;
+          width: 250px;
+          background-color: #ffffff;
+          z-index: 30;
+          padding: 1rem;
+          overflow-y: auto;
+        }
+      
+        #overlay ul {
+          margin-top: 5rem;
+          padding-left: 1rem;
+          color: #000;
+        }
+      
+        #overlay ul li {
+          padding: 0.5rem 0;
+          border-bottom: 1px solid #ccc;
+        }
+      
+        #overlay ul li i {
+          width: 1.5rem;
+        }
+      </style>
+      
+
+
+</head>
+<body class="bg-gray-100">
+
+    <!-- Header -->
+    <div class="bg-red-500 p-4 text-white flex justify-between items-center">
+        <div class="flex items-center">
+            <i class="fas fa-bars text-xl"></i>
+            <h1 class="ml-4 text-xl font-bold">Pantry</h1>
+        </div>
+        <div class="flex items-center">
+            <span id="ingredient-count" class="mr-2">You have 0 Ingredients</span>
+            <i class="fas fa-ellipsis-v text-xl ml-4"></i>
+        </div>
+    </div>
+
+    <div class="p-4">
+        <!-- Search bar -->
+        <input id="search" autocomplete="off" type="search" placeholder="add/remove/paste ingredients" step="any" class="w-full p-2 rounded-lg border border-gray-300">
+
+        <script>
+          document.getElementById('search').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+        const searchTerm = e.target.value.toLowerCase().trim();
+        if (!searchTerm) return;
+
+        const ingredients = document.querySelectorAll('.ingredient');
+        let found = false;
+
+        ingredients.forEach(ingredient => {
+            if (ingredient.innerText.toLowerCase() === searchTerm) {
+                found = true;
+                ingredient.classList.toggle('bg-green-500');
+                ingredient.classList.toggle('bg-gray-200');
+                ingredient.classList.toggle('text-white');
+            }
+        });
+
+        if (!found) {
+            // Allow users to add custom ingredients
+            const customIngredient = document.createElement("span");
+            customIngredient.className = "ingredient block p-2 bg-green-500 rounded-lg text-center text-white";
+            customIngredient.innerText = searchTerm;
+            customIngredient.onclick = function() {
+                this.classList.toggle("bg-green-500");
+                this.classList.toggle("bg-gray-200");
+                this.classList.toggle("text-white");
+            };
+            document.getElementById("categories").appendChild(customIngredient);
+        }
+
+        e.target.value = ''; // Clear search bar after adding
+    }
+});
+
+        </script>
+
+        <!-- Message Box -->
+        <div class="mt-4 p-4 bg-white rounded-lg border border-gray-300">
+            <p>The only ingredients we assume you have are salt, pepper, and water.</p>
+        </div>
+
+        <!-- Ingredient Sections -->
+        <div id="categories"></div>
+
+        <!-- Find Recipes Button -->
+        
+        <div class="mt-4 flex gap-2">
+            <button id="find-recipes" class="flex-1 p-3 bg-red-500 text-white rounded-lg">Find existing Recipes</button>
+            <button id="generate-ai-recipe" class="flex-1 p-3 bg-blue-500 text-white rounded-lg">Generate AI Recipe</button>
+        </div>
+        <div id="recipes" class="mt-4"></div>
+
+
+
+        <script>
+            document.getElementById('find-recipes').addEventListener('click', function() {
+    const selectedIngredients = Array.from(document.querySelectorAll('.ingredient.bg-green-500'))
+        .map(ingredient => ingredient.innerText);
+
+    if (selectedIngredients.length === 0) {
+        alert('Please select at least one ingredient to find recipes.');
+        return;
+    }
+
+    const apiKey = '976e0d7871c44655889f484ec2a538d1';
+    const query = selectedIngredients.join(',');
+
+    fetch(`https://api.spoonacular.com/recipes/findByIngredients?ingredients=${query}&number=10&apiKey=${apiKey}`)
+    .then(response => response.json())
+    .then(data => {
+        const recipesDiv = document.getElementById("recipes");
+        recipesDiv.innerHTML = ""; // Clear previous results
+
+        if (data.length > 0) {
+            let output = "<h2 class='mt-4 text-xl font-bold'>Recipes:</h2><div class='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>";
+            
+            data.forEach(recipe => {
+                output += `
+                    <div class="recipe-card p-4 bg-white rounded-lg border border-gray-300 shadow-md cursor-pointer" data-id="${recipe.id}">
+                        <img src="${recipe.image}" alt="${recipe.title}" class="w-full h-40 object-cover rounded-lg">
+                        <h3 class="mt-2 font-semibold">${recipe.title}</h3>
+                        <p class="text-sm text-gray-600">Used Ingredients: ${recipe.usedIngredientCount}, Missing: ${recipe.missedIngredientCount}</p>
+                        <button class="mt-2 p-2 bg-blue-500 text-white rounded-lg show-instructions">View Instructions</button>
+                        <div class="instructions hidden mt-2 text-sm text-gray-700"></div>
+                    </div>
+                `;
+            });
+
+            output += "</div>";
+            recipesDiv.innerHTML = output;
+
+            // ✅ Add event listener for recipe instructions
+            document.querySelectorAll('.show-instructions').forEach(button => {
+                button.addEventListener('click', function() {
+                    const recipeCard = this.closest('.recipe-card');
+                    const recipeId = recipeCard.getAttribute("data-id");
+                    const instructionsDiv = recipeCard.querySelector(".instructions");
+
+                    if (!instructionsDiv.classList.contains("hidden")) {
+                        instructionsDiv.classList.add("hidden");
+                        this.innerText = "View Instructions";
+                        return;
+                    }
+
+                    fetch(`https://api.spoonacular.com/recipes/${recipeId}/information?apiKey=${apiKey}`)
+                        .then(response => response.json())
+                        .then(recipeDetails => {
+                            if (recipeDetails.analyzedInstructions.length > 0) {
+                                const steps = recipeDetails.analyzedInstructions[0].steps.map(step => `<li>${step.step}</li>`).join("");
+                                instructionsDiv.innerHTML = `<ul class="list-disc ml-4">${steps}</ul>`;
+                            } else {
+                                instructionsDiv.innerHTML = "<p>No instructions available.</p>";
+                            }
+                            instructionsDiv.classList.remove("hidden");
+                            this.innerText = "Hide Instructions";
+                        })
+                        .catch(error => {
+                            console.error("Error fetching instructions:", error);
+                            instructionsDiv.innerHTML = "<p class='text-red-500'>Failed to load instructions.</p>";
+                            instructionsDiv.classList.remove("hidden");
+                        });
+                });
+            });
+        } else {
+            recipesDiv.innerHTML = "<p class='mt-4 text-red-500'>No recipes found. Try different ingredients.</p>";
+        }
+    })
+    .catch(error => {
+        console.error("Error fetching recipes:", error);
+        alert("Failed to fetch recipes. Please try again later.");
+    });
+
+});
+document.addEventListener("click", function(event) {
+    if (event.target.classList.contains("ingredient")) {
+        event.target.classList.toggle("bg-green-500");
+        event.target.classList.toggle("bg-gray-200");
+        event.target.classList.toggle("text-white");
+    }
+});
+
+document.getElementById('generate-ai-recipe').addEventListener('click', async function () {
+    const selectedIngredients = Array.from(document.querySelectorAll('.ingredient.bg-green-500'))
+        .map(ingredient => ingredient.innerText);
+
+    if (selectedIngredients.length === 0) {
+        alert('Please select at least one ingredient.');
+        return;
+    }
+
+    try {
+        const response = await fetch("http://localhost:5000/generate-recipe", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ ingredients: selectedIngredients })
+        });
+
+        const data = await response.json();
+        if (data.recipe) {
+            const recipeHtml = `
+                <h2 class="mt-4 text-xl font-bold">AI-Generated Recipe:</h2>
+                <div class="p-4 bg-white rounded-lg border border-gray-300 shadow-md">
+                    <p class="whitespace-pre-line">${data.recipe}</p>
+                    ${data.image ? `<img src="${data.image}" alt="Recipe Image" class="mt-4 max-w-full h-auto rounded-lg shadow-md">` : ''}
+                </div>
+            `;
+            document.getElementById("recipes").innerHTML = recipeHtml;
+        } else {
+            alert("Failed to generate recipe.");
+        }
+    } catch (error) {
+        console.error("Error:", error);
+        alert("Error fetching AI recipe.");
+    }
+});
+
+
+        </script>
+
+        <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                const ingredientData = {
+                    "Pantry Essentials": { 
+                        icon: "fas fa-utensils", 
+                        ingredients: ["butter", "egg", "garlic", "milk", "onion", "sugar"] 
+                    },
+                    "Vegetables": { 
+                        icon: "fas fa-carrot", 
+                        ingredients: ["carrot", "broccoli", "spinach", "tomato", "potato", "bell pepper"] 
+                    },
+                    "Berries": { 
+                        icon: "fas fa-seedling", 
+                        ingredients: ["strawberry", "blueberry", "raspberry", "blackberry"] 
+                    },
+                    "Fruits": { 
+                        icon: "fas fa-apple-alt", 
+                        ingredients: ["apple", "banana", "orange", "grapes", "mango", "watermelon"] 
+                    },
+                    "Meat": { 
+                        icon: "fas fa-drumstick-bite", 
+                        ingredients: ["chicken", "beef", "pork", "turkey", "bacon", "sausage"] 
+                    },
+                    "Seafood": { 
+                        icon: "fas fa-fish", 
+                        ingredients: ["salmon", "shrimp", "tuna", "crab", "lobster", "cod"] 
+                    },
+                    "Dairy": { 
+                        icon: "fas fa-cheese", 
+                        ingredients: ["cheese", "yogurt", "cream", "butter", "milk", "sour cream"] 
+                    },
+                    "Grains & Pasta": { 
+                        icon: "fas fa-bread-slice", 
+                        ingredients: ["rice", "pasta", "quinoa", "oats", "bread", "flour"] 
+                    },
+                    "Spices & Condiments": { 
+                        icon: "fas fa-pepper-hot", 
+                        ingredients: ["salt", "pepper", "soy sauce", "vinegar", "mustard", "ketchup"] 
+                    },
+                    "Nuts & Seeds": { 
+                        icon: "fas fa-seedling", 
+                        ingredients: ["almonds", "walnuts", "peanuts", "chia seeds", "flaxseeds", "cashews"] 
+                    },
+                    "Beverages": { 
+                        icon: "fas fa-coffee", 
+                        ingredients: ["coffee", "tea", "juice", "soda", "milkshake", "smoothie"] 
+                    },
+                };
+
+                const categoriesDiv = document.getElementById("categories");
+
+                function createCategorySection(category, data) {
+                    const section = document.createElement("div");
+                    section.className = "mt-4 p-4 bg-white rounded-lg border border-gray-300";
+
+                    section.innerHTML = `
+                        <div class="flex items-center">
+                            <i class="${data.icon} text-xl text-red-500"></i>
+                            <h2 class="ml-4 text-lg font-semibold">${category}</h2>
+                        </div>
+                        <div class="mt-4 grid grid-cols-2 gap-2">
+                            ${data.ingredients.map(item => `<span class="ingredient block p-2 bg-gray-200 rounded-lg text-center">${item}</span>`).join('')}
+                        </div>
+                    `;
+                    categoriesDiv.appendChild(section);
+                }
+
+                Object.entries(ingredientData).forEach(([category, data]) => createCategorySection(category, data));
+
+                const ingredientCount = document.getElementById("ingredient-count");
+                let selectedIngredients = new Set();
+
+                document.addEventListener("click", function(event) {
+                    if (event.target.classList.contains("ingredient")) {
+                        const ingredient = event.target.innerText;
+
+                        if (selectedIngredients.has(ingredient)) {
+                            selectedIngredients.delete(ingredient);
+                            event.target.classList.remove("bg-green-500", "text-white");
+                            event.target.classList.add("bg-gray-200");
+                        } else {
+                            selectedIngredients.add(ingredient);
+                            event.target.classList.remove("bg-gray-200");
+                            event.target.classList.add("bg-green-500", "text-white");
+                        }
+                        updateIngredientCount();
+                    }
+                });
+
+                function updateIngredientCount() {
+                    ingredientCount.innerText = `You have ${selectedIngredients.size} Ingredients`;
+                }
+            });
+        </script>
+    </div>
+    <i class="fas fa-bars text-xl" onclick="toggleMenu()"></i>
+
+    <div class="fixed inset-0 bg-black bg-opacity-50 z-20 hidden" id="overlay" onclick="toggleMenu()">
+    
+     <ul class="space-y-4">
+      <li class="flex items-center space-x-2">
+       <i class="fas fa-home">
+       </i>
+       <span>
+        Home
+       </span>
+      </li>
+      <li class="flex items-center space-x-2">
+       <i class="fas fa-warehouse">
+       </i>
+       <a href="pantry.html" class="text-black">Pantry</a>
+      </li>
+      <li class="flex items-center space-x-2">
+       <i class="fas fa-heart">
+       </i>
+       <span>
+        Favourites
+       </span>
+      </li>
+      <li class="flex items-center space-x-2">
+       <i class="fas fa-shopping-cart">
+       </i>
+       <span>
+        Shopping List
+       </span>
+      </li>
+      <li class="flex items-center space-x-2">
+       <i class="fas fa-robot">
+       </i>
+       <span>
+        AI Assistant
+       </span>
+      </li>
+     </ul>
+    </div>
+    <script>
+     function toggleMenu() {
+       const menu = document.getElementById('menu');
+       const overlay = document.getElementById('overlay');
+       const isMenuHidden = menu.classList.contains('menu-hidden');
+       if (isMenuHidden) {
+         menu.classList.remove('menu-hidden');
+         menu.classList.add('menu-visible');
+         overlay.classList.remove('hidden');
+       } else {
+         menu.classList.remove('menu-visible');
+         menu.classList.add('menu-hidden');
+         overlay.classList.add('hidden');
+       }
+     }
+    </script>
+    
+          </div>
+          <script>
+         document.getElementById('generate-ai-recipe').addEventListener('click', async function() {
+    const selectedIngredients = Array.from(document.querySelectorAll('.ingredient.bg-green-500'))
+        .map(ingredient => ingredient.innerText);
+
+    if (selectedIngredients.length === 0) {
+        alert('Please select at least one ingredient.');
+        return;
+    }
+
+    try {
+        const response = await fetch("http://localhost:5000/generate-recipe", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ ingredients: selectedIngredients })
+        });
+
+        const data = await response.json();
+        if (data.recipe) {
+            document.getElementById("recipes").innerHTML = `
+                <h2 class="mt-4 text-xl font-bold">AI-Generated Recipe:</h2>
+                <div class="p-4 bg-white rounded-lg border border-gray-300 shadow-md">
+                    <p>${data.recipe}</p>
+                </div>
+            `;
+        } else {
+            alert("Failed to generate recipe.");
+        }
+    } catch (error) {
+        console.error("Error:", error);
+        alert("Error fetching AI recipe.");
+    }
+});
+
+
+    </script> 
+        
+</body>
+</html>

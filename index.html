@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+    <style>
+        #img{
+            background-color: none;
+        }
+    </style>
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>SmartChef Login</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
+    <style>
+        body {
+            background-image: url('https://www.supercook.com/statics/images/onboarding-bg.svg');
+            background-size: cover;
+            background-repeat: no-repeat;
+            
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen">
+
+    <div class="absolute top-4 left-4">
+        <i class="fas fa-arrow-left text-2xl text-gray-600"></i>
+    </div>
+
+    <!-- Sign-up Link -->
+    <div class="absolute top-4 right-4">
+        <a id="signup-link" class="text-red-500 cursor-pointer">Sign up</a>
+    </div>
+
+    <div class="text-center">
+        <img src="smartchef_logo-removebg-preview.png" alt="SmartChef Logo" class="mx-auto w-80" id="img">
+        <div id="login-box" class="bg-white bg-opacity-90 p-8 rounded-lg shadow-lg w-80">
+            
+
+            <h2 class="text-xl mb-4">Login</h2>
+            <input id="login-email" class="w-full p-3 mb-4 border border-gray-300 rounded" placeholder="Email" type="email"/>
+            <input id="login-password" class="w-full p-3 mb-4 border border-gray-300 rounded" placeholder="Password" type="password"/>
+            <button onclick="login()" class="w-full bg-green-500 text-white p-3 rounded">Login</button>
+            <a class="block mt-4 text-gray-600" href="#">Forgot password</a>
+        </div>
+
+        <div id="signup-box" class="hidden bg-white bg-opacity-90 p-8 rounded-lg shadow-lg w-80">
+            <h2 class="text-xl mb-4">Sign Up</h2>
+            <input id="signup-email" class="w-full p-3 mb-4 border border-gray-300 rounded" placeholder="Email" type="email"/>
+            <input id="signup-password" class="w-full p-3 mb-4 border border-gray-300 rounded" placeholder="Password" type="password"/>
+            <button onclick="signup()" class="w-full bg-blue-500 text-white p-3 rounded">Sign Up</button>
+            <a id="back-to-login" class="block mt-4 text-gray-600 cursor-pointer">Back to Login</a>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+
+</body>
+</html>

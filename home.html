@@ -1,0 +1,179 @@
+<html>
+ <head>
+  <script src="https://cdn.tailwindcss.com">
+  </script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&amp;display=swap" rel="stylesheet"/>
+  <style>
+   .menu {
+     transition: transform 0.3s ease-in-out;
+   }
+   .menu-hidden {
+     transform: translateX(-100%);
+   }
+
+   .menu-visible {
+     transform: translateX(0);
+   }
+  </style>
+ </head>
+ <body class="bg-gray-100 font-roboto">
+  <div class="bg-red-500 text-white p-4">
+   <div class="container mx-auto flex justify-between items-center">
+    <div class="flex space-x-4">
+     <i class="fas fa-bars text-2xl cursor-pointer" onclick="toggleMenu()">
+     </i>
+    </div>
+    <div class="text-center flex-grow">
+     <h1 class="text-2xl font-bold">
+      SmartChef
+     </h1>
+    </div>
+    <div class="flex space-x-4">
+     <i class="fas fa-user-circle text-2xl">
+     </i>
+    </div>
+   </div>
+  </div>
+  <div class="bg-red-500 py-4">
+   <div class="container mx-auto">
+    <div class="relative">
+      <input id="searchInput" class="w-full p-3 rounded-full text-gray-700" placeholder="Find..." type="text"/>
+
+     <i class="fas fa-search absolute top-1/2 transform -translate-y-1/2 right-4 text-gray-500">
+     </i>
+    </div>
+   </div>
+  </div>
+  <div class="relative min-h-screen">
+   <img alt="Background with illustrations of ingredients" class="absolute inset-0 w-full h-full object-cover opacity-20" src="https://www.supercook.com/statics/images/onboarding-bg.svg"/>
+   <div class="container mx-auto text-center relative z-10 py-16">
+    <div id="recipeResults" class="mt-8 space-y-4 text-left max-w-xl mx-auto relative z-10"></div>
+
+    <img alt="Illustration of ingredients and a recipe book" class="mx-auto mb-4" height="100" src="https://storage.googleapis.com/a1aa/image/3eplwMlxBX5FSQ46ug79d6DLFekQ6VPoxpw7YHIQxOc.jpg" width="100"/>
+    <h2 class="text-2xl font-bold mb-2">
+      Start with a recipe name you love
+    
+    </h2>
+    <p class="text-lg text-gray-600">
+      Every search opens the door to something delicious. Try it out!
+    </p>
+   </div>
+  </div>
+  <div class="fixed inset-0 bg-black bg-opacity-50 z-20 hidden" id="overlay" onclick="toggleMenu()">
+  </div>
+  <div class="fixed inset-y-0 left-0 bg-white w-64 p-4 z-30 menu menu-hidden" id="menu">
+   <ul class="space-y-4">
+    <li class="flex items-center space-x-2">
+     <i class="fas fa-home">
+     </i>
+     <span>
+      Home
+     </span>
+    </li>
+    <li class="flex items-center space-x-2">
+     <i class="fas fa-warehouse">
+     </i>
+     <a href="pantry.html" class="text-black">Pantry</a>
+    </li>
+    <li class="flex items-center space-x-2">
+     <i class="fas fa-heart">
+     </i>
+     <a href="favourites.html" class="text-black">Favourites</a>
+      
+    </li>
+    <li class="flex items-center space-x-2">
+     <i class="fas fa-shopping-cart">
+     </i>
+     <span>
+      Shopping List
+     </span>
+    </li>
+    <li class="flex items-center space-x-2">
+     <i class="fas fa-robot">
+      
+     </i>
+     <a href="chatbot.html" class="text-black">  AI Assistant</a>
+     
+
+    </li>
+   </ul>
+  </div>
+  <script>
+   function toggleMenu() {
+     const menu = document.getElementById('menu');
+     const overlay = document.getElementById('overlay');
+     const isMenuHidden = menu.classList.contains('menu-hidden');
+     if (isMenuHidden) {
+       menu.classList.remove('menu-hidden');
+       menu.classList.add('menu-visible');
+       overlay.classList.remove('hidden');
+     } else {
+       menu.classList.remove('menu-visible');
+       menu.classList.add('menu-hidden');
+       overlay.classList.add('hidden');
+     }
+   }
+  </script>
+  <script src="script.js"></script>
+  <script>
+    document.getElementById('searchInput').addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') {
+        const query = e.target.value.trim();
+        if (query) {
+          fetchRecipe(query);
+        }
+      }
+    });
+  
+    async function fetchRecipe(query) {
+      const resultsContainer = document.getElementById('recipeResults');
+      resultsContainer.innerHTML = '<p class="text-gray-700">Searching recipes...</p>';
+  
+      try {
+        const apiKey = '976e0d7871c44655889f484ec2a538d1'; // 🔁 Replace this with your Spoonacular API key
+        const url = `https://api.spoonacular.com/recipes/complexSearch?query=${encodeURIComponent(query)}&number=5&addRecipeInformation=true&apiKey=${apiKey}`;
+  
+        const response = await fetch(url);
+        const data = await response.json();
+  
+        if (data.results && data.results.length > 0) {
+          window.lastFetchedRecipes = data.results;
+          const recipesHTML = data.results.map(recipe => `
+  <div class="bg-white p-4 rounded-lg shadow-md">
+    <h3 class="text-xl font-bold mb-2">${recipe.title}</h3>
+    <img src="${recipe.image}" alt="${recipe.title}" class="w-full h-48 object-cover rounded mb-2"/>
+    <p class="mb-2">${recipe.summary.replace(/<[^>]+>/g, '')}</p>
+    <button onclick="addToFavourites(${recipe.id})" class="mt-2 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
+      ❤️ Add to Favourites
+    </button>
+  </div>
+`).join('');
+resultsContainer.innerHTML = recipesHTML;
+    } else {
+          resultsContainer.innerHTML = '<p class="text-red-600">No recipes found. Try something else.</p>';
+        }
+      } catch (error) {
+        resultsContainer.innerHTML = `<p class="text-red-600">Error fetching recipes: ${error.message}</p>`;
+      }
+    }
+    function addToFavourites(recipeId) {
+  // Find recipe from the last fetched list
+  const recipe = window.lastFetchedRecipes.find(r => r.id === recipeId);
+  if (!recipe) return;
+
+  let favourites = JSON.parse(localStorage.getItem('favourites')) || [];
+
+  if (!favourites.find(r => r.id === recipeId)) {
+    favourites.push(recipe);
+    localStorage.setItem('favourites', JSON.stringify(favourites));
+    alert(`${recipe.title} added to favourites!`);
+  } else {
+    alert(`${recipe.title} is already in favourites.`);
+  }
+}
+
+  </script>
+  
+ </body>
+</html>

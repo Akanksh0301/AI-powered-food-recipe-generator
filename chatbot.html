@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Secure Recipe Chatbot</title>
+  <link rel="stylesheet" href="style.css"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+</head>
+<body>
+      <div class="chat-container" id="chat-container">
+    <div class="chat-box" id="chat-box"></div>
+    <div class="input-area">
+      <input type="text" id="user-input" placeholder="Ask your recipe doubt..." />
+      <button id="send-button">Send</button> <!-- Added id to button -->
+    </div>
+  </div>
+  <script >const chatBox = document.getElementById("chat-box");
+    const inputField = document.getElementById("user-input");
+    const sendButton = document.getElementById("send-button");
+    
+    // Send message on button click or Enter key
+    sendButton.addEventListener("click", sendMessage); // Listen to the button click
+    inputField.addEventListener("keypress", (e) => {
+      if (e.key === "Enter") sendMessage(); // Listen to Enter key press
+    });
+    
+    async function sendMessage() {
+      const userText = inputField.value.trim();
+      if (!userText) return;
+    
+      appendMessage("user", userText); // Append user's message
+      inputField.value = ""; // Clear the input field
+      sendButton.disabled = true; // Disable button while waiting for response
+    
+      appendMessage("bot", "Thinking..."); // Show a thinking message while waiting
+    
+      try {
+        const response = await fetch("http://localhost:3000/api/chat", { // Correct API URL
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message: userText })
+        });
+    
+        const data = await response.json();
+        chatBox.lastChild.textContent = data.reply; // Update "Thinking..." message with reply
+      } catch (error) {
+        console.error("❌ Chat error:", error);
+        appendMessage("bot", "Oops! Something went wrong.");
+      } finally {
+        sendButton.disabled = false; // Enable button again
+      }
+    }
+    
+    function appendMessage(sender, text) {
+      const msgDiv = document.createElement("div");
+      msgDiv.className = sender;
+      msgDiv.textContent = text;
+      chatBox.appendChild(msgDiv);
+      chatBox.scrollTop = chatBox.scrollHeight; // Scroll to the latest message
+    }
+    </script>
+    
+
+</body>
+</html>
