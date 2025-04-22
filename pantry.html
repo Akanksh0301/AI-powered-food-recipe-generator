@@ -131,7 +131,7 @@
         return;
     }
 
-    const apiKey = '976e0d7871c44655889f484ec2a538d1';
+    const apiKey = 'XXXXXXXXXXXXXXXxxx';  // replace this with spoonacular api
     const query = selectedIngredients.join(',');
 
     fetch(`https://api.spoonacular.com/recipes/findByIngredients?ingredients=${query}&number=10&apiKey=${apiKey}`)
