@@ -131,7 +131,7 @@
       resultsContainer.innerHTML = '<p class="text-gray-700">Searching recipes...</p>';
   
       try {
-        const apiKey = '976e0d7871c44655889f484ec2a538d1'; // 🔁 Replace this with your Spoonacular API key
+        const apiKey = 'XXXXXXXXXXXXXXXXXXX'; // 🔁 Replace this with your Spoonacular API key
         const url = `https://api.spoonacular.com/recipes/complexSearch?query=${encodeURIComponent(query)}&number=5&addRecipeInformation=true&apiKey=${apiKey}`;
   
         const response = await fetch(url);
